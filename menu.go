@@ -10,26 +10,30 @@ import (
 	"github.com/lxn/win"
 )
 
+const MENU_ID = 114514
+
 func init() {
-	OnAttachEvent = onLaunchEvent
+	OnLaunchEvent = onLaunchEvent
+	OnHandleEvent = onHandleEvent
 }
 
-func onLaunchEvent(rule, name string) {
+func onHandleEvent(msg uintptr) {
+	message := (*win.MSG)(unsafe.Pointer(msg))
+	if message.Message == win.WM_COMMAND {
+		DisplayToast("CLICKED! %d", message.WParam)
+	}
+}
+
+func onLaunchEvent() {
 	hMenu := win.HMENU(GetUI("MainForm.MainMenu"))
+	title := "MENU"
 	var mii win.MENUITEMINFO
 	mii.CbSize = uint32(unsafe.Sizeof(mii))
-	mii.FMask = win.MIIM_TYPE
+	mii.FMask = win.MIIM_TYPE | win.MIIM_ID
 	mii.FType = win.MFT_STRING
-	mii.DwTypeData = syscall.StringToUTF16Ptr("MENU1")
-	mii.Cch = uint32(len([]rune("MENU!")))
-	if !win.InsertMenuItem(hMenu, uint32(4), true, &mii) {
-		DisplayModal("failed")
-	}
-	mii.DwTypeData = syscall.StringToUTF16Ptr("MENU2")
-	if !win.InsertMenuItem(hMenu, uint32(5), true, &mii) {
-		DisplayModal("failed")
-	}
-	if !win.DrawMenuBar(win.HWND(GetUI("MainForm"))) {
-		DisplayModal("failed")
-	}
+	mii.DwTypeData = syscall.StringToUTF16Ptr(title)
+	mii.Cch = uint32(len([]rune(title)))
+	mii.WID = MENU_ID
+	win.InsertMenuItem(hMenu, uint32(4), true, &mii)
+	win.DrawMenuBar(win.HWND(GetUI("MainForm")))
 }
