@@ -5,35 +5,26 @@
 package main
 
 import (
-	"syscall"
 	"unsafe"
-	"github.com/lxn/win"
+	"github.com/gonutz/w32"
 )
-
-const MENU_ID = 114514
 
 func init() {
 	OnLaunchEvent = onLaunchEvent
 	OnWindowEvent = onWindowEvent
 }
 
-func onWindowEvent(msg uintptr) {
-	message := (*win.MSG)(unsafe.Pointer(msg))
-	if message.Message == win.WM_COMMAND {
-		DisplayToast("CLICKED! %d", message.WParam)
-	}
+func onLaunchEvent() {
+	h := w32.HMENU(GetUI("MainForm.MainMenu"))
+	w32.AppendMenu(h, w32.MF_STRING, 810, "GO!")
+	w32.DrawMenuBar(w32.HWND(GetUI("MainForm")))
 }
 
-func onLaunchEvent() {
-	hMenu := win.HMENU(GetUI("MainForm.MainMenu"))
-	title := "MENU"
-	var mii win.MENUITEMINFO
-	mii.CbSize = uint32(unsafe.Sizeof(mii))
-	mii.FMask = win.MIIM_TYPE | win.MIIM_ID
-	mii.FType = win.MFT_STRING
-	mii.DwTypeData = syscall.StringToUTF16Ptr(title)
-	mii.Cch = uint32(len([]rune(title)))
-	mii.WID = MENU_ID
-	win.InsertMenuItem(hMenu, uint32(4), true, &mii)
-	win.DrawMenuBar(win.HWND(GetUI("MainForm")))
+func onWindowEvent(event uintptr) {
+	msg := (*w32.MSG)(unsafe.Pointer(event))
+	if msg.Message == w32.WM_COMMAND {
+		if msg.WParam == 810 {
+			DisplayToast("SCOOOP!!!")
+		}
+	}
 }
