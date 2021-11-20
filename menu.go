@@ -14,10 +14,10 @@ const MENU_ID = 114514
 
 func init() {
 	OnLaunchEvent = onLaunchEvent
-	OnHandleEvent = onHandleEvent
+	OnWindowEvent = onWindowEvent
 }
 
-func onHandleEvent(msg uintptr) {
+func onWindowEvent(msg uintptr) {
 	message := (*win.MSG)(unsafe.Pointer(msg))
 	if message.Message == win.WM_COMMAND {
 		DisplayToast("CLICKED! %d", message.WParam)
